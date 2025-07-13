@@ -1,5 +1,6 @@
 import { Hono } from 'https://deno.land/x/hono@v3.12.8/mod.ts';
 import { Client } from 'https://deno.land/x/postgres@v0.17.0/mod.ts';
+import { composeApplication, createPostgresRepositories } from './CompositionRoot.ts';
 
 // 環境変数の取得
 const DATABASE_URL = Deno.env.get('DATABASE_URL') || 'postgres://postgres:password@localhost:5432/myapp';
@@ -16,6 +17,9 @@ async function initDatabase() {
     console.error('データベース接続エラー:', error);
   }
 }
+
+const repositories = createPostgresRepositories();
+const application = composeApplication(repositories);
 
 // Honoアプリケーションの作成
 const app = new Hono();
@@ -45,17 +49,12 @@ app.get('/', (c) => {
 // ジャンル一覧取得
 app.get('/genres', async (c) => {
   try {
-    const result = await client.queryArray(
-      'SELECT id, name, created_at FROM genres ORDER BY id'
-    );
+    const result = await application.getAllGenresUseCase();
+    if (!result) {
+      return c.json({ error: 'ジャンルが見つかりません' }, 404);
+    }
     
-    const genres = result.rows.map(row => ({
-      id: row[0],
-      name: row[1],
-      created_at: row[2]
-    }));
-    
-    return c.json(genres);
+    return c.json(result);
   } catch (error) {
     console.error('ジャンル取得エラー:', error);
     return c.json({ error: 'ジャンルの取得に失敗しました' }, 500);
