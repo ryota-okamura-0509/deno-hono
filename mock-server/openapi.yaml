@@ -1,0 +1,403 @@
+openapi: 3.0.3
+info:
+  title: 外部API モックサーバー
+  description: 日別ジャンル投稿数統計を受信・管理するモックサーバーAPI
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+servers:
+  - url: http://localhost:4000
+    description: 開発環境
+paths:
+  /:
+    get:
+      summary: サーバー情報取得
+      description: モックサーバーの基本情報とエンドポイント一覧を取得
+      responses:
+        '200':
+          description: サーバー情報
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "外部API モックサーバー"
+                  description:
+                    type: string
+                    example: "日別ジャンル投稿数統計を受信するモックサーバー"
+                  endpoints:
+                    type: object
+                    additionalProperties:
+                      type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /health:
+    get:
+      summary: ヘルスチェック
+      description: サーバーの稼働状況を確認
+      responses:
+        '200':
+          description: サーバー稼働中
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "healthy"
+                  memory_usage:
+                    type: object
+                    description: メモリ使用量
+                  stored_records:
+                    type: integer
+                    example: 150
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /api/v1/stats/daily-genre:
+    post:
+      summary: 日別ジャンル統計データ受信
+      description: 日別のジャンル投稿数統計データを受信して保存
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/DailyGenreStatInput'
+            examples:
+              sample_data:
+                summary: サンプルデータ
+                value:
+                  - date: "2025-07-14"
+                    genre: "プログラミング"
+                    count: 5
+                  - date: "2025-07-14"
+                    genre: "日記"
+                    count: 3
+      responses:
+        '201':
+          description: データ受信成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "日別ジャンル統計データを正常に受信しました"
+                  received_count:
+                    type: integer
+                    example: 2
+                  timestamp:
+                    type: string
+                    format: date-time
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DailyGenreStat'
+        '400':
+          description: リクエストデータが不正
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    get:
+      summary: 受信した統計データ一覧取得
+      description: 受信した日別ジャンル統計データの一覧を取得（ページネーション対応）
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+          description: ページ番号
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 100
+          description: 1ページあたりの件数
+      responses:
+        '200':
+          description: 統計データ一覧
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DailyGenreStat'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+                  timestamp:
+                    type: string
+                    format: date-time
+
+    delete:
+      summary: 統計データをクリア
+      description: 保存されている全ての統計データを削除
+      responses:
+        '200':
+          description: データクリア成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "統計データをクリアしました"
+                  cleared_count:
+                    type: integer
+                    example: 150
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /api/v1/stats/daily-genre/latest:
+    get:
+      summary: 最新の統計データ取得
+      description: 最新の日別ジャンル統計データを取得
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+          description: 取得件数
+      responses:
+        '200':
+          description: 最新統計データ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DailyGenreStat'
+                  count:
+                    type: integer
+                    example: 10
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /api/v1/stats/daily-genre/{date}:
+    get:
+      summary: 特定日の統計データ取得
+      description: 指定された日付の日別ジャンル統計データを取得
+      parameters:
+        - name: date
+          in: path
+          required: true
+          schema:
+            type: string
+            format: date
+            example: "2025-07-14"
+          description: 取得対象の日付 (YYYY-MM-DD形式)
+      responses:
+        '200':
+          description: 指定日の統計データ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  date:
+                    type: string
+                    format: date
+                    example: "2025-07-14"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DailyGenreStat'
+                  count:
+                    type: integer
+                    example: 5
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /api/v1/stats/summary:
+    get:
+      summary: 統計サマリー取得
+      description: 受信した統計データのサマリー情報を取得
+      responses:
+        '200':
+          description: 統計サマリー
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_records:
+                    type: integer
+                    example: 150
+                  unique_genres:
+                    type: integer
+                    example: 8
+                  unique_dates:
+                    type: integer
+                    example: 10
+                  by_genre:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      properties:
+                        total_count:
+                          type: integer
+                        records:
+                          type: integer
+                    example:
+                      "プログラミング":
+                        total_count: 45
+                        records: 10
+                      "日記":
+                        total_count: 23
+                        records: 8
+                  by_date:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      properties:
+                        total_count:
+                          type: integer
+                        records:
+                          type: integer
+                    example:
+                      "2025-07-14":
+                        total_count: 15
+                        records: 8
+                      "2025-07-13":
+                        total_count: 12
+                        records: 6
+                  timestamp:
+                    type: string
+                    format: date-time
+
+components:
+  schemas:
+    DailyGenreStatInput:
+      type: object
+      required:
+        - date
+        - genre
+        - count
+      properties:
+        date:
+          type: string
+          format: date
+          example: "2025-07-14"
+          description: 投稿日付
+        genre:
+          type: string
+          example: "プログラミング"
+          description: ジャンル名
+        count:
+          type: integer
+          minimum: 0
+          example: 5
+          description: 投稿数
+
+    DailyGenreStat:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          example: "2025-07-14"
+          description: 投稿日付
+        genre:
+          type: string
+          example: "プログラミング"
+          description: ジャンル名
+        count:
+          type: integer
+          minimum: 0
+          example: 5
+          description: 投稿数
+        received_at:
+          type: string
+          format: date-time
+          example: "2025-07-14T15:30:00.000Z"
+          description: データ受信日時
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+          description: 現在のページ番号
+        limit:
+          type: integer
+          example: 50
+          description: 1ページあたりの件数
+        total:
+          type: integer
+          example: 150
+          description: 総データ数
+        pages:
+          type: integer
+          example: 3
+          description: 総ページ数
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "データの処理中にエラーが発生しました"
+          description: エラーメッセージ
+        details:
+          type: string
+          example: "Invalid JSON format"
+          description: 詳細なエラー情報
+        received:
+          type: object
+          description: 受信したデータ（バリデーションエラー時）
+
+  examples:
+    sample_daily_stats:
+      summary: 日別統計データのサンプル
+      value:
+        - date: "2025-07-14"
+          genre: "プログラミング"
+          count: 5
+        - date: "2025-07-14"
+          genre: "日記"
+          count: 3
+        - date: "2025-07-14"
+          genre: "食べ物"
+          count: 2
+
+tags:
+  - name: Health
+    description: ヘルスチェック関連
+  - name: Statistics
+    description: 統計データ管理
