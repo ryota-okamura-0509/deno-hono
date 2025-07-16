@@ -1,14 +1,16 @@
-export interface UserRepository {
-    all: () => Promise<User[] | undefined>;
-}
-
-// 直積
-export type User = {
-    id: number | undefined;
+export type RegisteredUser = {
+    id: number;
     name: string;
     email: string;
-    createdAt: Date | undefined;
+    createAt: Date;
 }
+
+export type UnregisteredUser = {
+    id: undefined;
+    name: string;
+    email: string;
+    createdAt: undefined;
+};
 
 // registeredUser.isAdmin(); // true
 // registeredUser.setAdmin(false); // false
