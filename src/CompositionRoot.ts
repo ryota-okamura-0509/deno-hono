@@ -5,6 +5,7 @@ import { createGetAllGenresUseCase } from './usecase/GetAllGenresUseCase.ts';
 
 import { createPostgresUserRepository } from './interface/PostgresUserRepository.ts';
 import { createGetAllUserUseCase } from './usecase/GetAllUsersUsecase.ts';
+import { createFindUserUseCase } from './usecase/FindUserUseCase.ts';
 
 type Repositories = {
     genreRepository: GenreRepository;
@@ -14,9 +15,10 @@ type Repositories = {
 export type UseCases = {
     getAllGenresUseCase: () => Promise<Genre[] | undefined>;
     getAllUsersUseCase: () => Promise<User[] | undefined>;
+    findUserUseCase: (id: number) => Promise<RegisteredUser | undefined>;
 }
 
-export const createPostgresRepositories: Repositories = (databaseUrl: string) => {
+export const createPostgresRepositories = (databaseUrl: string): Repositories => {
     const client = new Client(databaseUrl);
     const genreRepository: GenreRepository = createPostgresGenreRepository(client);
     const userRepository: UserRepository = createPostgresUserRepository(client);
@@ -29,8 +31,10 @@ export const createPostgresRepositories: Repositories = (databaseUrl: string) =>
 export const composeApplication = (repositories: Repositories): UseCases =>  {
     const getAllGenresUseCase = createGetAllGenresUseCase(repositories.genreRepository);
     const getAllUsersUseCase = createGetAllUserUseCase(repositories.userRepository);
+    const findUserUseCase = createFindUserUseCase(repositories.userRepository);
     return {
         getAllGenresUseCase,
-        getAllUsersUseCase
+        getAllUsersUseCase,
+        findUserUseCase
     }
 }

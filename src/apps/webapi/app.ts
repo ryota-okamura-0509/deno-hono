@@ -2,6 +2,7 @@ import { Hono } from 'https://deno.land/x/hono@v3.12.8/mod.ts';
 import { UseCases } from '../../CompositionRoot.ts';
 import { createGetUsersRouteHandler } from './routes/user/get-users-route.ts';
 import { createGetGenresRouteHandler } from './routes/genre/get-genre-route.ts';
+import { createFindUserRouteHandler } from './routes/user/get-user-route.ts';
 
 export const getHonoApp = (useCases: UseCases) => {
     const app = new Hono();
@@ -30,6 +31,7 @@ export const getHonoApp = (useCases: UseCases) => {
     
     // ユーザー一覧取得
     app.get('/users', createGetUsersRouteHandler(useCases.getAllUsersUseCase));
+    app.get('/user/:id', createFindUserRouteHandler(useCases.findUserUseCase));
     app.get('/genres', createGetGenresRouteHandler(useCases.getAllGenresUseCase));
     
     return app;

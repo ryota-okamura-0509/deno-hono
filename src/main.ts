@@ -24,56 +24,6 @@ const application = composeApplication(repositories);
 // Honoアプリケーションの作成
 const app = new Hono();
 
-// CORS設定
-app.use('*', async (c, next) => {
-  c.header('Access-Control-Allow-Origin', '*');
-  c.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  c.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  
-  if (c.req.method === 'OPTIONS') {
-    return c.text('', 200);
-  }
-  
-  await next();
-});
-
-// ルートエンドポイント
-app.get('/', (c) => {
-  return c.json({ 
-    message: 'Deno + Hono + PostgreSQL API',
-    status: 'running',
-    timestamp: new Date().toISOString()
-  });
-});
-
-// 特定のユーザー取得
-app.get('/users/:id', async (c) => {
-  const id = c.req.param('id');
-  
-  try {
-    const result = await client.queryArray(
-      'SELECT id, name, email, created_at FROM users WHERE id = $1',
-      [id]
-    );
-    
-    if (result.rows.length === 0) {
-      return c.json({ error: 'ユーザーが見つかりません' }, 404);
-    }
-    
-    const user = {
-      id: result.rows[0][0],
-      name: result.rows[0][1],
-      email: result.rows[0][2],
-      created_at: result.rows[0][3]
-    };
-    
-    return c.json(user);
-  } catch (error) {
-    console.error('ユーザー取得エラー:', error);
-    return c.json({ error: 'ユーザーの取得に失敗しました' }, 500);
-  }
-});
-
 // 新しいユーザー作成
 app.post('/users', async (c) => {
   try {
