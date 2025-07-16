@@ -18,7 +18,7 @@ async function initDatabase() {
   }
 }
 
-const repositories = createPostgresRepositories();
+const repositories = createPostgresRepositories( DATABASE_URL);
 const application = composeApplication(repositories);
 
 // Honoアプリケーションの作成
@@ -44,42 +44,6 @@ app.get('/', (c) => {
     status: 'running',
     timestamp: new Date().toISOString()
   });
-});
-
-// ジャンル一覧取得
-app.get('/genres', async (c) => {
-  try {
-    const result = await application.getAllGenresUseCase();
-    if (!result) {
-      return c.json({ error: 'ジャンルが見つかりません' }, 404);
-    }
-    
-    return c.json(result);
-  } catch (error) {
-    console.error('ジャンル取得エラー:', error);
-    return c.json({ error: 'ジャンルの取得に失敗しました' }, 500);
-  }
-});
-
-// ユーザー一覧取得
-app.get('/users', async (c) => {
-  try {
-    const result = await client.queryArray(
-      'SELECT id, name, email, created_at FROM users ORDER BY id'
-    );
-    
-    const users = result.rows.map(row => ({
-      id: row[0],
-      name: row[1],
-      email: row[2],
-      created_at: row[3]
-    }));
-    
-    return c.json(users);
-  } catch (error) {
-    console.error('ユーザー取得エラー:', error);
-    return c.json({ error: 'ユーザーの取得に失敗しました' }, 500);
-  }
 });
 
 // 特定のユーザー取得
