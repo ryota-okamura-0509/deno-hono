@@ -1,8 +1,12 @@
-type FindUserUseCase = (id: number) => Promise<RegisteredUser | undefined>;
+import { RegisteredUser } from '../domain/Entity/User.ts';
+import { UserRepository } from '../domain/Gateway/UserRepository.ts';
+import { Result } from 'neverthrow';
+
+type FindUserUseCase = (id: number) => Promise<Result<RegisteredUser, Error>>;
 type FindUserUseCaseFactory = (repository: UserRepository) => FindUserUseCase;
 
 export const createFindUserUseCase: FindUserUseCaseFactory = (repository) => {
-    return async (id: number): Promise<RegisteredUser | undefined> => {
+    return async (id: number) => {
         return await repository.find(id);
     };
 }
