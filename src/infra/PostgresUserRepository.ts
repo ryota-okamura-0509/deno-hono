@@ -47,7 +47,6 @@ export const postgresFindUser: PostgresFindUser = (client) => {
         });
     }
 }
-
 export const postgresSaveUser: PostgresSaveUser = (client) => {
     return async (user: UnregisteredUser) => {
         const result = await client.queryArray(
@@ -56,6 +55,7 @@ export const postgresSaveUser: PostgresSaveUser = (client) => {
         );
         if (!result || !result.rows || result.rows.length === 0) {
             return err({
+                type: "UserCreationFailed",
                 message: "User creation failed"
             });
         }
