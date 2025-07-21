@@ -1,5 +1,7 @@
+import { GetAllGenresUseCase } from "../../../../application/usecase/GetAllGenresUseCase.ts";
+
 export const createGetGenresRouteHandler =
-  (getAllGenresUseCase: () => GetAllGenresUseCase) => async (c) => {
+  (getAllGenresUseCase: GetAllGenresUseCase) => async (c) => {
     try {
       const result = await getAllGenresUseCase();
       if (!result) {

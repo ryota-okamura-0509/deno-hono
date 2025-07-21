@@ -24,63 +24,6 @@ const application = composeApplication(repositories);
 // Honoアプリケーションの作成
 const app = new Hono();
 
-// 新しいユーザー作成
-app.post('/users', async (c) => {
-  try {
-    const body = await c.req.json();
-    const { name, email } = body;
-    
-    if (!name || !email) {
-      return c.json({ error: '名前とメールアドレスは必須です' }, 400);
-    }
-    
-    const result = await client.queryArray(
-      'INSERT INTO users (name, email) VALUES ($1, $2) RETURNING id, name, email, created_at',
-      [name, email]
-    );
-    
-    const user = {
-      id: result.rows[0][0],
-      name: result.rows[0][1],
-      email: result.rows[0][2],
-      created_at: result.rows[0][3]
-    };
-    
-    return c.json(user, 201);
-  } catch (error) {
-    console.error('ユーザー作成エラー:', error);
-    return c.json({ error: 'ユーザーの作成に失敗しました' }, 500);
-  }
-});
-
-// 投稿一覧取得
-app.get('/posts', async (c) => {
-  try {
-    const result = await client.queryArray(`
-      SELECT p.id, p.title, p.content, p.created_at, u.name as author_name, g.name as genre_name, p.genre_id
-      FROM posts p
-      JOIN users u ON p.user_id = u.id
-      LEFT JOIN genres g ON p.genre_id = g.id
-      ORDER BY p.created_at DESC
-    `);
-    
-    const posts = result.rows.map(row => ({
-      id: row[0],
-      title: row[1],
-      content: row[2],
-      created_at: row[3],
-      author_name: row[4],
-      genre_name: row[5],
-      genre_id: row[6]
-    }));
-    
-    return c.json(posts);
-  } catch (error) {
-    console.error('投稿取得エラー:', error);
-    return c.json({ error: '投稿の取得に失敗しました' }, 500);
-  }
-});
-
 // 新しい投稿作成
 app.post('/posts', async (c) => {
   try {

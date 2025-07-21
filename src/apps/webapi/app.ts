@@ -3,6 +3,8 @@ import { UseCases } from '../../CompositionRoot.ts';
 import { createGetUsersRouteHandler } from './routes/user/get-users-route.ts';
 import { createGetGenresRouteHandler } from './routes/genre/get-genre-route.ts';
 import { createFindUserRouteHandler } from './routes/user/get-user-route.ts';
+import { createPostUserRouteHandler } from './routes/user/post-user-route.ts';
+import { createGetPostsRouteHandler } from './routes/post/get-posts-route.ts';
 
 export const getHonoApp = (useCases: UseCases) => {
     const app = new Hono();
@@ -32,7 +34,8 @@ export const getHonoApp = (useCases: UseCases) => {
     // ユーザー一覧取得
     app.get('/users', createGetUsersRouteHandler(useCases.getAllUsersUseCase));
     app.get('/user/:id', createFindUserRouteHandler(useCases.findUserUseCase));
+    app.post('/users', createPostUserRouteHandler(useCases.saveUserUseCase));
     app.get('/genres', createGetGenresRouteHandler(useCases.getAllGenresUseCase));
-    
+    app.get('/posts', createGetPostsRouteHandler(useCases.getAllPostsUseCase));    
     return app;
 }

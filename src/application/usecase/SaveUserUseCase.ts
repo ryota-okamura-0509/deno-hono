@@ -1,9 +1,10 @@
-import { RegisteredUser, UnregisteredUser } from '../domain/Entity/User.ts';
-import { UserRepository } from '../domain/Gateway/UserRepository.ts';
+
 import { Result } from 'neverthrow';
+import { RegisteredUser, UnregisteredUser, UserCreationError } from '../../domain/Entity/User.ts';
+import { UserRepository, UserRepositoryError } from '../../domain/Gateway/UserRepository.ts';
 
 export type SaveUserUseCaseError = UserRepositoryError | UserCreationError;
-type SaveUserUseCase = (user: UnregisteredUser) => Promise<Result<RegisteredUser, SaveUserUseCaseError>>;
+export type SaveUserUseCase = (user: UnregisteredUser) => Promise<Result<RegisteredUser, SaveUserUseCaseError>>;
 type SaveUserUseCaseFactory = (repository: UserRepository) => SaveUserUseCase;
 
 export const createSaveUserUseCase: SaveUserUseCaseFactory = (repository) => {

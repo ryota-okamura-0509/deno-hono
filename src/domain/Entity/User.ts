@@ -1,3 +1,5 @@
+import { Result, ok, err } from 'neverthrow';
+
 export type RegisteredUser = {
     id: number;
     name: string;
