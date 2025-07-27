@@ -10,11 +10,11 @@ import { Result } from 'neverthrow';
 import { PostRepository } from './domain/Gateway/PostRepository.ts';
 import { createPostgresPostRepository } from './infra/PostgresPostRepository.ts';
 import { RegisteredPost } from './domain/Entity/Post.ts';
-import { createGetAllPostsUseCase } from './application/usecase/GetAllPostsUseCase.ts';
-import { createGetAllUserUseCase, UsersNotFoundError } from './application/usecase/GetAllUsersUsecase.ts';
-import { createFindUserUseCase } from './application/usecase/FindUserUseCase.ts';
-import { createSaveUserUseCase } from './application/usecase/SaveUserUseCase.ts';
-import { createGetAllGenresUseCase } from './application/usecase/GetAllGenresUseCase.ts';
+import { createGetAllPostsUseCase, getAllPostsUseCase } from './application/usecase/GetAllPostsUseCase.ts';
+import { createGetAllUserUseCase, GetAllUsersUseCase, UsersNotFoundError } from './application/usecase/GetAllUsersUsecase.ts';
+import { createFindUserUseCase, FindUserUseCase } from './application/usecase/FindUserUseCase.ts';
+import { createSaveUserUseCase, SaveUserUseCase } from './application/usecase/SaveUserUseCase.ts';
+import { createGetAllGenresUseCase, GetAllGenresUseCase } from './application/usecase/GetAllGenresUseCase.ts';
 
 
 type Repositories = {
@@ -24,11 +24,11 @@ type Repositories = {
 }
 
 export type UseCases = {
-    getAllGenresUseCase: () => Promise<RegisteredGenre[] | undefined>;
-    getAllUsersUseCase: () => Promise<Result<RegisteredUser[], UsersNotFoundError>>;
-    findUserUseCase: (id: number) => Promise<Result<RegisteredUser, Error>>;
-    saveUserUseCase: (user: UnregisteredUser) => Promise<Result<RegisteredUser, Error>>;
-    getAllPostsUseCase: () => Promise<Result<RegisteredPost[], Error>>;
+    getAllGenresUseCase: GetAllGenresUseCase;
+    getAllUsersUseCase: GetAllUsersUseCase;
+    findUserUseCase: FindUserUseCase;
+    saveUserUseCase: SaveUserUseCase;
+    getAllPostsUseCase: getAllPostsUseCase;
 }
 
 export const createPostgresRepositories = (databaseUrl: string): Repositories => {

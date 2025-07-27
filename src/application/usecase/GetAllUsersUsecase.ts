@@ -3,7 +3,7 @@ import { Result, ok, err } from 'neverthrow';
 import { UserRepository } from '../../domain/Gateway/UserRepository.ts';
 import { RegisteredUser } from '../../domain/Entity/User.ts';
 
-type GetAllUsersUseCase = () => Promise<Result<RegisteredUser[], UsersNotFoundError>>;
+export type GetAllUsersUseCase = () => Promise<Result<RegisteredUser[], UsersNotFoundError>>;
 type GetAllUsersUseCaseFactory = (repository: UserRepository) => GetAllUsersUseCase;
 
 // type GetAllUsersUseCase = () => Promise<User[] | undefined>;
